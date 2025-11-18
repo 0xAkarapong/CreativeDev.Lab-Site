@@ -1,11 +1,12 @@
 import { and, desc, eq, ne, sql } from "drizzle-orm";
 
 import { db } from "./drizzle";
+const typedDb = db as any;
 import { posts } from "./schema";
 
 const publishedFilter = eq(posts.is_published, true);
 
-type Post = typeof posts.$inferSelect;
+export type Post = typeof posts.$inferSelect;
 
 const fallbackPosts: Post[] = [
   {
@@ -52,14 +53,13 @@ const fallbackPosts: Post[] = [
 function getFallbackPosts(limit?: number) {
   return typeof limit === "number" ? fallbackPosts.slice(0, limit) : fallbackPosts;
 }
-
 export async function getPublishedPosts(limit?: number) {
   if (!db) {
     return getFallbackPosts(limit);
   }
 
   try {
-    return await db.query.posts.findMany({
+    return await typedDb.query.posts.findMany({
       where: publishedFilter,
       orderBy: desc(posts.created_at),
       limit,
@@ -84,13 +84,13 @@ export async function getPaginatedPosts({
 
   try {
     const [items, countResult] = await Promise.all([
-      db.query.posts.findMany({
+      typedDb.query.posts.findMany({
         where: publishedFilter,
         orderBy: desc(posts.created_at),
         limit,
         offset,
       }),
-      db
+      typedDb
         .select({ value: sql<number>`count(*)` })
         .from(posts)
         .where(publishedFilter),
@@ -118,7 +118,7 @@ export async function getPostBySlug(
     : and(eq(posts.slug, slug), publishedFilter);
 
   try {
-    return await db.query.posts.findFirst({
+    return await typedDb.query.posts.findFirst({
       where: whereClause,
     });
   } catch (error) {
@@ -133,7 +133,7 @@ export async function getPostById(id: string) {
   }
 
   try {
-    return await db.query.posts.findFirst({
+    return await typedDb.query.posts.findFirst({
       where: eq(posts.id, id),
     });
   } catch (error) {
@@ -148,7 +148,7 @@ export async function getAllPosts() {
   }
 
   try {
-    return await db.query.posts.findMany({
+    return await typedDb.query.posts.findMany({
       orderBy: desc(posts.created_at),
     });
   } catch (error) {
@@ -163,7 +163,7 @@ export async function getRelatedPosts(slug: string, limit = 3) {
   }
 
   try {
-    return await db.query.posts.findMany({
+    return await typedDb.query.posts.findMany({
       where: and(publishedFilter, ne(posts.slug, slug)),
       limit,
       orderBy: desc(posts.created_at),
@@ -180,8 +180,8 @@ export async function getPublishedSlugs() {
   }
 
   try {
-    const results = await db.select({ slug: posts.slug }).from(posts).where(publishedFilter);
-    return results.map((row) => row.slug);
+    const results = await typedDb.select({ slug: posts.slug }).from(posts).where(publishedFilter);
+    return results.map((row: { slug: string }) => row.slug);
   } catch (error) {
     console.error("Failed to fetch slugs", error);
     return fallbackPosts.map((post) => post.slug);

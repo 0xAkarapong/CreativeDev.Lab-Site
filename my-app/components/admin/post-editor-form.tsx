@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { createPost, updatePost } from "@/app/admin/actions";
@@ -44,7 +44,7 @@ export function PostEditorForm({ mode, initialValues }: PostEditorFormProps) {
   const supabase = createClient();
 
   const form = useForm<PostFormValues>({
-    resolver: zodResolver(postFormSchema),
+    resolver: zodResolver(postFormSchema) as Resolver<PostFormValues>,
     defaultValues: {
       id: initialValues?.id,
       title: initialValues?.title ?? "",

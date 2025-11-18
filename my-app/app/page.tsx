@@ -6,6 +6,7 @@ import { Features } from "@/components/features";
 import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import { getPublishedPosts } from "@/lib/supabase/queries";
+import type { Post } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
   title: "Modern landing pages + Supabase blog CMS",
@@ -50,7 +51,7 @@ async function BlogList({
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      {latestPosts.map((post) => (
+      {latestPosts.map((post: Post) => (
         <BlogPostCard key={post.id} post={post} variant="compact" />
       ))}
       {!latestPosts.length && (

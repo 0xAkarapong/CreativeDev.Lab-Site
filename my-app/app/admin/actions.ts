@@ -126,5 +126,6 @@ function assertDb() {
     );
   }
 
-  return db;
+  // Cast to any to avoid narrow import typing issues and allow access to query.* tables
+  return db as any;
 }

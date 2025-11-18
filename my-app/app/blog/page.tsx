@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { BlogPostCard } from "@/components/blog/blog-post-card";
 import { PaginationControls } from "@/components/blog/pagination-controls";
-import { getPaginatedPosts } from "@/lib/supabase/queries";
+import { getPaginatedPosts, type Post } from "@/lib/supabase/queries";
 
 const POSTS_PER_PAGE = 6;
 
@@ -62,7 +62,7 @@ export default async function Blog({
         {items.length ? (
           <>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {items.map((post) => (
+              {items.map((post: Post) => (
                 <BlogPostCard key={post.id} post={post} />
               ))}
             </div>

@@ -22,7 +22,7 @@ const baseUrl =
 
 export async function generateStaticParams() {
   const slugs = await getPublishedSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return slugs.map((slug: string) => ({ slug }));
 }
 
 export async function generateMetadata({
