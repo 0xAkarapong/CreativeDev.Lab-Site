@@ -20,6 +20,12 @@ import { Suspense } from "react";
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
+  const navItems = [
+    { href: "/#solutions", label: "Solutions" },
+    { href: "/blog", label: "Blog" },
+    { href: "/#contact", label: "Contact" },
+  ];
+
   return (
     <header className="w-full flex justify-center border-b border-b-foreground/10 h-16">
       <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
@@ -29,13 +35,17 @@ export function Header() {
         <div className="hidden md:flex">
           <NavigationMenu>
             <NavigationMenuList>
-              <NavigationMenuItem>
-                <Link href="/blog" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Blog
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
+              {navItems.map((item) => (
+                <NavigationMenuItem key={item.href}>
+                  <Link href={item.href} legacyBehavior passHref>
+                    <NavigationMenuLink
+                      className={navigationMenuTriggerStyle()}
+                    >
+                      {item.label}
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
+              ))}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -57,13 +67,16 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="grid gap-4 py-4">
-                <Link
-                  href="/blog"
-                  className="text-sm font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Blog
-                </Link>
+                {navItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="text-sm font-medium"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
               </div>
               <div className="mt-4">
                 {!hasEnvVars ? (

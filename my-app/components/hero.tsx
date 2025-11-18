@@ -1,19 +1,43 @@
-import { Button } from "./ui/button";
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+
+const stats = [
+  { label: "Launches delivered", value: "32" },
+  { label: "Avg. Lighthouse score", value: "98" },
+  { label: "Blog subscribers", value: "4.3k" },
+];
 
 export function Hero() {
   return (
-    <div className="text-center">
-      <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl dark:text-gray-50">
-        Creative Development Lab
-      </h1>
-      <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-        The fastest way to build modern web applications.
+    <section className="text-center" id="top">
+      <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+        CreativeDev.Lab · Product Studio
       </p>
-      <div className="mt-10 flex items-center justify-center gap-x-6">
-        <Button asChild>
-          <a href="/login">Get Started</a>
+      <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl">
+        Landing pages and blogs engineered to convert.
+      </h1>
+      <p className="mt-6 text-lg text-muted-foreground">
+        We architect high-performance marketing sites and editorial hubs on
+        Next.js, Supabase, Drizzle ORM, and shadcn/ui. Every component ships
+        accessible by default.
+      </p>
+      <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <Button asChild size="lg">
+          <Link href="/#contact">Launch a project</Link>
+        </Button>
+        <Button asChild variant="outline" size="lg">
+          <Link href="/blog">Read the blog</Link>
         </Button>
       </div>
-    </div>
+      <dl className="mt-12 grid gap-6 text-left sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.label} className="rounded-2xl border p-6 text-center">
+            <dt className="text-sm text-muted-foreground">{stat.label}</dt>
+            <dd className="text-3xl font-semibold">{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }

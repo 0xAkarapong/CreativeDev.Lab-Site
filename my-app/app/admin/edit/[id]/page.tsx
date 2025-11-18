@@ -1,121 +1,41 @@
-"use client";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { updatePost } from "../../actions";
-import { useRouter } from "next/navigation";
+import { PostEditorForm } from "@/components/admin/post-editor-form";
 import { getPostById } from "@/lib/supabase/queries";
-import { useEffect } from "react";
 
-const formSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  slug: z.string().min(1),
-  content: z.string(),
-  is_published: z.boolean(),
-});
+export const metadata: Metadata = {
+  title: "Edit post",
+};
 
-export default function EditPost({ params }: { params: { id: string } }) {
-  const router = useRouter();
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-  });
+export default async function EditPost({ params }: { params: { id: string } }) {
+  const post = await getPostById(params.id);
 
-  useEffect(() => {
-    getPostById(params.id).then((post) => {
-      if (post) {
-        form.reset(post);
-      }
-    });
-  }, [form, params.id]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    await updatePost(values);
-    router.push("/admin");
+  if (!post) {
+    notFound();
   }
 
+  const initialValues = {
+    id: post.id,
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt ?? "",
+    content: post.content ?? "",
+    cover_image_url: post.cover_image_url,
+    is_published: post.is_published ?? false,
+  };
+
   return (
-    <div className="container mx-auto py-12">
-      <h1 className="text-4xl font-bold mb-8">Edit Post</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Post title" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="slug"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Slug</FormLabel>
-                <FormControl>
-                  <Input placeholder="post-slug" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Content</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Post content" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="is_published"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">Publish</FormLabel>
-                  <FormDescription>
-                    Make this post visible to the public.
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <Button type="submit">Save</Button>
-        </form>
-      </Form>
+    <div className="container mx-auto py-12 max-w-4xl">
+      <header className="mb-8 space-y-2">
+        <p className="text-sm font-semibold text-primary">Editor</p>
+        <h1 className="text-4xl font-bold">Update post</h1>
+        <p className="text-muted-foreground">
+          Editing automatically revalidates the statically generated blog
+          detail page and sitemap within sixty seconds.
+        </p>
+      </header>
+      <PostEditorForm mode="edit" initialValues={initialValues} />
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import type { Metadata } from "next";
@@ -11,8 +12,33 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: {
+    default: "CreativeDev.Lab | Full-stack Product Studio",
+    template: "%s | CreativeDev.Lab",
+  },
+  description:
+    "CreativeDev.Lab ships conversion-focused landing pages and content hubs backed by Supabase.",
+  openGraph: {
+    title: "CreativeDev.Lab",
+    description:
+      "Landing pages and blogs engineered with Next.js, Supabase, and shadcn/ui.",
+    url: defaultUrl,
+    siteName: "CreativeDev.Lab",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CreativeDev.Lab",
+    description:
+      "Landing pages and blogs engineered with Next.js, Supabase, and shadcn/ui.",
+    images: ["/twitter-image.png"],
+  },
 };
 
 const geistSans = Geist({
@@ -37,7 +63,9 @@ export default function RootLayout({
         >
           <Header />
           {children}
-          <Footer />
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>
