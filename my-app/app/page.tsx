@@ -9,9 +9,9 @@ import { getPublishedPosts } from "@/lib/supabase/queries";
 import type { Post } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
-  title: "CreativeDev.Lab",
+  title: "CreativeDev.Lab | Multi-Disciplinary Research and Dev Centre",
   description:
-    "CreativeDev.Lab builds high-conversion marketing sites and editorial hubs with Next.js, Supabase, and shadcn/ui.",
+    "CreativeDev.Lab Multi-Disciplinary Research and Dev Centre. In co-creation of Harbour.Space Institute of Technology & CreativeLabTH Group.",
 };
 
 export default function Home() {
