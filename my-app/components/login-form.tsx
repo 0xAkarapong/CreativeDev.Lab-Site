@@ -129,15 +129,7 @@ export function LoginForm({
                 {isPending ? "Signing in..." : "Sign in"}
               </Button>
 
-              <p className="text-center text-sm text-muted-foreground">
-                Need an account?{" "}
-                <Link
-                  href="/auth/sign-up"
-                  className="text-primary underline-offset-2 hover:underline"
-                >
-                  Create one
-                </Link>
-              </p>
+
             </form>
           </Form>
         </CardContent>

@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   title: "Edit post",
 };
 
-export default async function EditPost({ params }: { params: { id: string } }) {
+export default async function EditPost(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const post = await getPostById(params.id);
 
   if (!post) {

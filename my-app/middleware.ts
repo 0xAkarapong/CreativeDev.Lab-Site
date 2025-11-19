@@ -35,18 +35,18 @@ export default async function middleware(request: NextRequest) {
   );
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    if (!session) {
+    if (!user) {
       return NextResponse.redirect(new URL("/auth/login", request.url));
     }
 
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
-      .eq("id", session.user.id)
+      .eq("id", user.id)
       .maybeSingle();
 
     if (!profile || profile.role !== "admin") {

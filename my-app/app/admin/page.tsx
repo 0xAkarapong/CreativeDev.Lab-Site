@@ -5,6 +5,8 @@ import { AdminPostTable } from "@/components/admin/post-table";
 import { Button } from "@/components/ui/button";
 import { getAllPosts } from "@/lib/supabase/queries";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Admin dashboard",
 };
@@ -23,9 +25,14 @@ export default async function AdminDashboard() {
             authenticated surface powered by Supabase Auth.
           </p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/admin/new">New post</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="lg">
+            <Link href="/admin/users">Manage Users</Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/admin/new">New post</Link>
+          </Button>
+        </div>
       </div>
       <section className="mt-10">
         <AdminPostTable posts={posts} />
