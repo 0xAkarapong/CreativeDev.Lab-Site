@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { AdminPostTable } from "@/components/admin/post-table";
 import { Button } from "@/components/ui/button";
-import { getAllPosts } from "@/lib/supabase/queries";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +26,11 @@ export default async function AdminDashboard() {
       }, { onConflict: 'id', ignoreDuplicates: true });
   }
 
-  const posts = await getAllPosts();
+  // Fetch all posts using authenticated client
+  const { data: posts } = await supabase
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   return (
     <div className="container mx-auto py-12">

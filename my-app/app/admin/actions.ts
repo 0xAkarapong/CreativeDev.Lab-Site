@@ -16,13 +16,28 @@ async function requireAdminUser() {
     throw new Error("You must be signed in.");
   }
 
+  // Check if this is the bootstrap admin email
+  const isDefaultAdmin = user.email === "akarapong00123@gmail.com";
+
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") {
+  // Auto-create profile for bootstrap admin if it doesn't exist
+  if (isDefaultAdmin && !profile) {
+    await supabase
+      .from("profiles")
+      .upsert({
+        id: user.id,
+        full_name: "Super Admin",
+        role: "admin",
+      });
+  }
+
+  // Allow access if bootstrap admin OR if profile has admin role
+  if (!isDefaultAdmin && (!profile || profile.role !== "admin")) {
     throw new Error("You are not allowed to perform this action.");
   }
 

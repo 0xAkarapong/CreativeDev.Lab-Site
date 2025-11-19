@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PostEditorForm } from "@/components/admin/post-editor-form";
-import { getPostById } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Edit post",
@@ -10,7 +10,13 @@ export const metadata: Metadata = {
 
 export default async function EditPost(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const post = await getPostById(params.id);
+  const supabase = await createClient();
+  
+  const { data: post } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("id", params.id)
+    .single();
 
   if (!post) {
     notFound();
