@@ -9,7 +9,7 @@ import { getPublishedPosts } from "@/lib/supabase/queries";
 import type { Post } from "@/lib/supabase/queries";
 
 export const metadata: Metadata = {
-  title: "Modern landing pages + Supabase blog CMS",
+  title: "CreativeDev.Lab",
   description:
     "CreativeDev.Lab builds high-conversion marketing sites and editorial hubs with Next.js, Supabase, and shadcn/ui.",
 };
