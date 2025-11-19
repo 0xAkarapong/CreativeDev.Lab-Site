@@ -37,6 +37,7 @@ I encountered and fixed the following issues during verification:
     - Added "Manage Users" link to the Admin Dashboard.
     - Installed missing shadcn components: `select`, `dialog`, `table`, `badge`.
 
+
 6.  **Fix Supabase Auth Security Warning**:
     - Replaced `supabase.auth.getSession()` with `supabase.auth.getUser()` in `middleware.ts`.
     - Replaced `supabase.auth.getSession()` with `supabase.auth.getUser()` in `middleware.ts`.
@@ -46,6 +47,16 @@ I encountered and fixed the following issues during verification:
     - Modified `middleware.ts` to allow `akarapong00123@gmail.com` to bypass the role check.
     - Updated `app/admin/page.tsx` to automatically create/upsert the admin profile for this email if it doesn't exist.
     - This ensures the default admin can access the dashboard and bootstrap the system.
+
+8.  **Remove Drizzle ORM**:
+    - Uninstalled `drizzle-orm`, `drizzle-kit`, and `postgres` packages.
+    - Deleted `drizzle.config.ts`, `lib/supabase/drizzle.ts`, and `lib/supabase/schema.ts`.
+    - Rewrote `lib/supabase/queries.ts` to use Supabase Client instead of Drizzle.
+    - Updated `app/admin/actions.ts` to use Supabase Client for CRUD operations.
+    - Updated `app/admin/users/actions.ts` and `app/admin/users/page.tsx` to use Supabase Client.
+    - Updated `app/admin/page.tsx` to use Supabase Client for profile bootstrap.
+    - Added `createAnonClient()` to `lib/supabase/server.ts` for build-time queries.
+    - All database operations now use Supabase Client API instead of direct Postgres connections.
 
 ## Verification Results
 The build output confirms the following route types:

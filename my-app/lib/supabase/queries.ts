@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/server";
 import { cache } from "react";
 
 export type Post = {
@@ -22,7 +22,7 @@ export type Profile = {
 };
 
 export const getPublishedPosts = cache(async (page = 1, limit = 10) => {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const start = (page - 1) * limit;
   const end = start + limit - 1;
 
@@ -41,14 +41,18 @@ export const getPublishedPosts = cache(async (page = 1, limit = 10) => {
   return posts as Post[];
 });
 
-export const getPostBySlug = cache(async (slug: string) => {
-  const supabase = await createClient();
-  const { data: post, error } = await supabase
+export const getPostBySlug = cache(async (slug: string, options?: { includeDrafts?: boolean }) => {
+  const supabase = createAnonClient();
+  let query = supabase
     .from("posts")
     .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
+    .eq("slug", slug);
+
+  if (!options?.includeDrafts) {
+    query = query.eq("is_published", true);
+  }
+
+  const { data: post, error } = await query.single();
 
   if (error) {
     return null;
@@ -57,8 +61,23 @@ export const getPostBySlug = cache(async (slug: string) => {
   return post as Post;
 });
 
+export const getPublishedSlugs = cache(async () => {
+  const supabase = createAnonClient();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("is_published", true);
+
+  if (error) {
+    console.error("Error fetching published slugs:", error);
+    return [];
+  }
+
+  return posts.map(post => post.slug);
+});
+
 export const getAllPosts = cache(async () => {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data: posts, error } = await supabase
     .from("posts")
     .select("*")
@@ -73,7 +92,7 @@ export const getAllPosts = cache(async () => {
 });
 
 export const getRelatedPosts = cache(async (currentSlug: string, limit = 3) => {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data: posts, error } = await supabase
     .from("posts")
     .select("*")
@@ -91,7 +110,7 @@ export const getRelatedPosts = cache(async (currentSlug: string, limit = 3) => {
 });
 
 export const getPostById = cache(async (id: string) => {
-  const supabase = await createClient();
+  const supabase = createAnonClient();
   const { data: post, error } = await supabase
     .from("posts")
     .select("*")
@@ -105,22 +124,22 @@ export const getPostById = cache(async (id: string) => {
   return post as Post;
 });
 
-export const getPaginatedPosts = cache(async (page: number, limit: number) => {
-  const supabase = await createClient();
-  const start = (page - 1) * limit;
-  const end = start + limit - 1;
+export const getPaginatedPosts = cache(async (params: { limit: number; offset: number }) => {
+  const { limit, offset } = params;
+  const supabase = createAnonClient();
+  const end = offset + limit - 1;
 
   const { data: posts, count, error } = await supabase
     .from("posts")
     .select("*", { count: "exact" })
     .eq("is_published", true)
     .order("created_at", { ascending: false })
-    .range(start, end);
+    .range(offset, end);
 
   if (error) {
     console.error("Error fetching paginated posts:", error);
-    return { posts: [], total: 0 };
+    return { items: [], total: 0 };
   }
 
-  return { posts: posts as Post[], total: count || 0 };
+  return { items: posts as Post[], total: count || 0 };
 });

@@ -2,15 +2,10 @@
 
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
-
-import { db } from "@/lib/supabase/drizzle";
-import { posts, profiles } from "@/lib/supabase/schema";
 import { postFormSchema, type PostFormValues } from "@/lib/validations/post";
 import { createClient } from "@/lib/supabase/server";
 
 async function requireAdminUser() {
-  const database = assertDb();
   const supabase = await createClient();
   const {
     data: { user },
@@ -21,9 +16,11 @@ async function requireAdminUser() {
     throw new Error("You must be signed in.");
   }
 
-  const profile = await database.query.profiles.findFirst({
-    where: eq(profiles.id, user.id),
-  });
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
 
   if (profile?.role !== "admin") {
     throw new Error("You are not allowed to perform this action.");
@@ -44,11 +41,11 @@ function revalidateBlog(slug?: string) {
 type CreatePostValues = Omit<PostFormValues, "id">;
 
 export async function createPost(values: CreatePostValues) {
-  const database = assertDb();
+  const supabase = await createClient();
   const authorId = await requireAdminUser();
   const payload = postFormSchema.omit({ id: true }).parse(values);
 
-  await database.insert(posts).values({
+  const { error } = await supabase.from("posts").insert({
     id: randomUUID(),
     title: payload.title,
     slug: payload.slug,
@@ -57,16 +54,20 @@ export async function createPost(values: CreatePostValues) {
     cover_image_url: payload.cover_image_url,
     is_published: payload.is_published,
     author_id: authorId,
-    created_at: new Date(),
-    updated_at: new Date(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   });
+
+  if (error) {
+    throw new Error("Failed to create post: " + error.message);
+  }
 
   revalidateBlog(payload.slug);
   return { slug: payload.slug };
 }
 
 export async function updatePost(values: PostFormValues) {
-  const database = assertDb();
+  const supabase = await createClient();
   const authorId = await requireAdminUser();
   const payload = postFormSchema.parse(values);
 
@@ -74,27 +75,33 @@ export async function updatePost(values: PostFormValues) {
     throw new Error("Missing post id");
   }
 
-  const existingPost = await database.query.posts.findFirst({
-    where: eq(posts.id, payload.id),
-  });
+  const { data: existingPost } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("id", payload.id)
+    .single();
 
   if (!existingPost) {
     throw new Error("Post not found");
   }
 
-  await database
-    .update(posts)
-    .set({
+  const { error } = await supabase
+    .from("posts")
+    .update({
       title: payload.title,
       slug: payload.slug,
       excerpt: payload.excerpt,
       content: payload.content,
       cover_image_url: payload.cover_image_url,
       is_published: payload.is_published,
-      updated_at: new Date(),
+      updated_at: new Date().toISOString(),
       author_id: authorId,
     })
-    .where(eq(posts.id, payload.id));
+    .eq("id", payload.id);
+
+  if (error) {
+    throw new Error("Failed to update post: " + error.message);
+  }
 
   if (existingPost.slug !== payload.slug) {
     revalidateBlog(existingPost.slug);
@@ -105,27 +112,27 @@ export async function updatePost(values: PostFormValues) {
 }
 
 export async function deletePost(id: string) {
-  const database = assertDb();
+  const supabase = await createClient();
   await requireAdminUser();
-  const post = await database.query.posts.findFirst({
-    where: eq(posts.id, id),
-  });
+  
+  const { data: post } = await supabase
+    .from("posts")
+    .select("slug")
+    .eq("id", id)
+    .single();
 
   if (!post) {
     return;
   }
 
-  await database.delete(posts).where(eq(posts.id, id));
-  revalidateBlog(post.slug);
-}
+  const { error } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", id);
 
-function assertDb() {
-  if (!db) {
-    throw new Error(
-      "Database connection is not configured. Set DATABASE_URL to enable admin actions.",
-    );
+  if (error) {
+    throw new Error("Failed to delete post: " + error.message);
   }
 
-  // Cast to any to avoid narrow import typing issues and allow access to query.* tables
-  return db as any;
+  revalidateBlog(post.slug);
 }
