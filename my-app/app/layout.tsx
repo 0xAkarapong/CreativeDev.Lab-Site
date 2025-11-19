@@ -1,9 +1,10 @@
 import { Suspense } from "react";
+import { font } from "@/lib/fonts";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { cn } from "@/lib/utils";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -41,12 +42,6 @@ export const metadata: Metadata = {
   },
 };
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  display: "swap",
-  subsets: ["latin"],
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -54,7 +49,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body
+        className={cn(
+          "min-h-screen bg-background font-sans antialiased",
+          font.variable,
+        )}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
