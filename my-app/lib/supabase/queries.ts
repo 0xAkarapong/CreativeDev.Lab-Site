@@ -1,189 +1,126 @@
-import { and, desc, eq, ne, sql } from "drizzle-orm";
+import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
 
-import { db } from "./drizzle";
-const typedDb = db as any;
-import { posts } from "./schema";
+export type Post = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  is_published: boolean;
+  author_id: string;
+};
 
-const publishedFilter = eq(posts.is_published, true);
+export type Profile = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: "admin" | "editor" | "user";
+};
 
-export type Post = typeof posts.$inferSelect;
+export const getPublishedPosts = cache(async (page = 1, limit = 10) => {
+  const supabase = await createClient();
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
 
-const fallbackPosts: Post[] = [
-  {
-    id: "preview-creative-launch",
-    title: "How we ship CreativeDev.Lab launches in days",
-    slug: "creative-launch-sprint",
-    excerpt:
-      "A field guide to building conversion-focused marketing sites using Next.js App Router, Supabase, and shadcn/ui.",
-    content: `<p>We start with a conversion brief, wire Storybook-driven components, and publish via Supabase-backed CMS workflows. Every block is statically generated for performance.</p><h2>Tooling stack</h2><ul><li>Next.js App Router + ISR</li><li>Supabase Auth, Postgres, Storage</li><li>Drizzle ORM for schema safety</li><li>shadcn/ui for accessible components</li></ul>`,
-    cover_image_url: "/images/post-placeholder.svg",
-    created_at: new Date("2024-02-01T00:00:00.000Z"),
-    updated_at: new Date("2024-02-02T00:00:00.000Z"),
-    is_published: true,
-    author_id: null,
-  },
-  {
-    id: "preview-editorial",
-    title: "Supabase-powered editorial workflow",
-    slug: "supabase-editorial-workflow",
-    excerpt:
-      "Draft, edit, and publish stories with role-based access, image uploads, and ISR revalidation in under a minute.",
-    content: `<p>The admin dashboard authenticates through Supabase middleware. Posts revalidate the listing, detail route, and sitemap, ensuring SEO freshness.</p>`,
-    cover_image_url: "/images/post-placeholder.svg",
-    created_at: new Date("2024-03-15T00:00:00.000Z"),
-    updated_at: new Date("2024-03-15T00:00:00.000Z"),
-    is_published: true,
-    author_id: null,
-  },
-  {
-    id: "preview-rolling-updates",
-    title: "Pattern libraries documented in Storybook",
-    slug: "storybook-pattern-library",
-    excerpt:
-      "Every hero, feature grid, and blog card ships with docs so marketing teams can remix without engineers.",
-    content: `<p>Storybook entries demonstrate marketing-ready layouts. We combine lucide icons, shadcn/ui cards, and Tailwind CSS 4 theming.</p>`,
-    cover_image_url: "/images/post-placeholder.svg",
-    created_at: new Date("2024-04-22T00:00:00.000Z"),
-    updated_at: new Date("2024-04-22T00:00:00.000Z"),
-    is_published: true,
-    author_id: null,
-  },
-];
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .range(start, end);
 
-function getFallbackPosts(limit?: number) {
-  return typeof limit === "number" ? fallbackPosts.slice(0, limit) : fallbackPosts;
-}
-export async function getPublishedPosts(limit?: number) {
-  if (!db) {
-    return getFallbackPosts(limit);
+  if (error) {
+    console.error("Error fetching published posts:", error);
+    return [];
   }
 
-  try {
-    return await typedDb.query.posts.findMany({
-      where: publishedFilter,
-      orderBy: desc(posts.created_at),
-      limit,
-    });
-  } catch (error) {
-    console.error("Failed to fetch published posts", error);
-    return getFallbackPosts(limit);
-  }
-}
+  return posts as Post[];
+});
 
-export async function getPaginatedPosts({
-  limit,
-  offset,
-}: {
-  limit: number;
-  offset: number;
-}) {
-  if (!db) {
-    const items = fallbackPosts.slice(offset, offset + limit);
-    return { items, total: fallbackPosts.length };
+export const getPostBySlug = cache(async (slug: string) => {
+  const supabase = await createClient();
+  const { data: post, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+
+  if (error) {
+    return null;
   }
 
-  try {
-    const [items, countResult] = await Promise.all([
-      typedDb.query.posts.findMany({
-        where: publishedFilter,
-        orderBy: desc(posts.created_at),
-        limit,
-        offset,
-      }),
-      typedDb
-        .select({ value: sql<number>`count(*)` })
-        .from(posts)
-        .where(publishedFilter),
-    ]);
+  return post as Post;
+});
 
-    const total = Number(countResult[0]?.value ?? 0);
-    return { items, total };
-  } catch (error) {
-    console.error("Failed to paginate posts", error);
-    const items = fallbackPosts.slice(offset, offset + limit);
-    return { items, total: fallbackPosts.length };
-  }
-}
+export const getAllPosts = cache(async () => {
+  const supabase = await createClient();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-export async function getPostBySlug(
-  slug: string,
-  { includeDrafts = false }: { includeDrafts?: boolean } = {},
-) {
-  if (!db) {
-    return fallbackPosts.find((post) => post.slug === slug);
+  if (error) {
+    console.error("Error fetching all posts:", error);
+    return [];
   }
 
-  const whereClause = includeDrafts
-    ? eq(posts.slug, slug)
-    : and(eq(posts.slug, slug), publishedFilter);
+  return posts as Post[];
+});
 
-  try {
-    return await typedDb.query.posts.findFirst({
-      where: whereClause,
-    });
-  } catch (error) {
-    console.error("Failed to fetch post by slug", error);
-    return fallbackPosts.find((post) => post.slug === slug);
-  }
-}
+export const getRelatedPosts = cache(async (currentSlug: string, limit = 3) => {
+  const supabase = await createClient();
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("is_published", true)
+    .neq("slug", currentSlug)
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
-export async function getPostById(id: string) {
-  if (!db) {
-    return fallbackPosts.find((post) => post.id === id);
-  }
-
-  try {
-    return await typedDb.query.posts.findFirst({
-      where: eq(posts.id, id),
-    });
-  } catch (error) {
-    console.error("Failed to fetch post by id", error);
-    return fallbackPosts.find((post) => post.id === id);
-  }
-}
-
-export async function getAllPosts() {
-  if (!db) {
-    return fallbackPosts;
+  if (error) {
+    console.error("Error fetching related posts:", error);
+    return [];
   }
 
-  try {
-    return await typedDb.query.posts.findMany({
-      orderBy: desc(posts.created_at),
-    });
-  } catch (error) {
-    console.error("Failed to fetch all posts", error);
-    return fallbackPosts;
-  }
-}
+  return posts as Post[];
+});
 
-export async function getRelatedPosts(slug: string, limit = 3) {
-  if (!db) {
-    return fallbackPosts.filter((post) => post.slug !== slug).slice(0, limit);
-  }
+export const getPostById = cache(async (id: string) => {
+  const supabase = await createClient();
+  const { data: post, error } = await supabase
+    .from("posts")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  try {
-    return await typedDb.query.posts.findMany({
-      where: and(publishedFilter, ne(posts.slug, slug)),
-      limit,
-      orderBy: desc(posts.created_at),
-    });
-  } catch (error) {
-    console.error("Failed to fetch related posts", error);
-    return fallbackPosts.filter((post) => post.slug !== slug).slice(0, limit);
-  }
-}
-
-export async function getPublishedSlugs() {
-  if (!db) {
-    return fallbackPosts.map((post) => post.slug);
+  if (error) {
+    return null;
   }
 
-  try {
-    const results = await typedDb.select({ slug: posts.slug }).from(posts).where(publishedFilter);
-    return results.map((row: { slug: string }) => row.slug);
-  } catch (error) {
-    console.error("Failed to fetch slugs", error);
-    return fallbackPosts.map((post) => post.slug);
+  return post as Post;
+});
+
+export const getPaginatedPosts = cache(async (page: number, limit: number) => {
+  const supabase = await createClient();
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data: posts, count, error } = await supabase
+    .from("posts")
+    .select("*", { count: "exact" })
+    .eq("is_published", true)
+    .order("created_at", { ascending: false })
+    .range(start, end);
+
+  if (error) {
+    console.error("Error fetching paginated posts:", error);
+    return { posts: [], total: 0 };
   }
-}
+
+  return { posts: posts as Post[], total: count || 0 };
+});

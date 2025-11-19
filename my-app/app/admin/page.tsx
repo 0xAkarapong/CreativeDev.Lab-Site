@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AdminPostTable } from "@/components/admin/post-table";
 import { Button } from "@/components/ui/button";
 import { getAllPosts } from "@/lib/supabase/queries";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,24 +12,19 @@ export const metadata: Metadata = {
   title: "Admin dashboard",
 };
 
-import { createClient } from "@/lib/supabase/server";
-import { db } from "@/lib/supabase/drizzle";
-import { profiles } from "@/lib/supabase/schema";
-
 export default async function AdminDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
   // Auto-create profile for default admin if missing
-  if (user?.email === "akarapong00123@gmail.com" && db) {
-    await db
-      .insert(profiles)
-      .values({
+  if (user?.email === "akarapong00123@gmail.com") {
+    await supabase
+      .from("profiles")
+      .upsert({
         id: user.id,
         full_name: "Super Admin",
         role: "admin",
-      })
-      .onConflictDoNothing();
+      }, { onConflict: 'id', ignoreDuplicates: true });
   }
 
   const posts = await getAllPosts();

@@ -3,8 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { db } from "@/lib/supabase/drizzle";
-import { profiles } from "@/lib/supabase/schema";
 
 const createUserSchema = z.object({
   email: z.string().email(),
@@ -56,24 +54,20 @@ export async function createUser(prevState: ActionState, formData: FormData): Pr
     }
 
     // 2. Create profile in database
-    if (!db) {
-      return { error: "Database connection not available" };
-    }
-    
-    await db
-      .insert(profiles)
-      .values({
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({
         id: authData.user.id,
         full_name: fullName,
         role: role,
-      })
-      .onConflictDoUpdate({
-        target: profiles.id,
-        set: {
-          full_name: fullName,
-          role: role,
-        },
       });
+
+    if (profileError) {
+      console.error("Error creating profile:", profileError);
+      // Try to clean up the auth user if profile creation fails? 
+      // For now, just return error.
+      return { error: "User created but failed to create profile: " + profileError.message };
+    }
 
     revalidatePath("/admin/users");
     return { success: true, message: "User created successfully" };
