@@ -39,7 +39,13 @@ I encountered and fixed the following issues during verification:
 
 6.  **Fix Supabase Auth Security Warning**:
     - Replaced `supabase.auth.getSession()` with `supabase.auth.getUser()` in `middleware.ts`.
+    - Replaced `supabase.auth.getSession()` with `supabase.auth.getUser()` in `middleware.ts`.
     - This ensures that the user session is validated with the Supabase Auth server instead of just reading the cookie, addressing the security warning.
+
+7.  **Bootstrap Admin Access**:
+    - Modified `middleware.ts` to allow `akarapong00123@gmail.com` to bypass the role check.
+    - Updated `app/admin/page.tsx` to automatically create/upsert the admin profile for this email if it doesn't exist.
+    - This ensures the default admin can access the dashboard and bootstrap the system.
 
 ## Verification Results
 The build output confirms the following route types:

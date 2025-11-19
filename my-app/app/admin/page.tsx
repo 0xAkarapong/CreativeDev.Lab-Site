@@ -11,7 +11,26 @@ export const metadata: Metadata = {
   title: "Admin dashboard",
 };
 
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/supabase/drizzle";
+import { profiles } from "@/lib/supabase/schema";
+
 export default async function AdminDashboard() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // Auto-create profile for default admin if missing
+  if (user?.email === "akarapong00123@gmail.com" && db) {
+    await db
+      .insert(profiles)
+      .values({
+        id: user.id,
+        full_name: "Super Admin",
+        role: "admin",
+      })
+      .onConflictDoNothing();
+  }
+
   const posts = await getAllPosts();
 
   return (

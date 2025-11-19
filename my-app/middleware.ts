@@ -49,7 +49,10 @@ export default async function middleware(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
 
-    if (!profile || profile.role !== "admin") {
+    // Allow access if user has admin role OR if it's the specific bootstrap email
+    const isDefaultAdmin = user.email === "akarapong00123@gmail.com";
+    
+    if (!isDefaultAdmin && (!profile || profile.role !== "admin")) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
