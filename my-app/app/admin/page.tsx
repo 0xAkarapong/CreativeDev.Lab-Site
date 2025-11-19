@@ -53,7 +53,7 @@ export default async function AdminDashboard() {
         </div>
       </div>
       <section className="mt-10">
-        <AdminPostTable posts={posts} />
+        <AdminPostTable posts={posts ?? []} />
       </section>
     </div>
   );
