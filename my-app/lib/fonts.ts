@@ -4,4 +4,3 @@ export const font = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
 });
-
