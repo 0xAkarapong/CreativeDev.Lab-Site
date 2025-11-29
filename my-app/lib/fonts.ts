@@ -1,6 +1,11 @@
-import { Manrope } from "next/font/google";
+import { Outfit, Inter } from "next/font/google";
 
-export const font = Manrope({
+export const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+});
+
+export const fontHeading = Outfit({
+  subsets: ["latin"],
+  variable: "--font-heading",
 });

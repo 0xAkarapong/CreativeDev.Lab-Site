@@ -12,6 +12,7 @@ export type Post = {
   cover_image_url: string | null;
   is_published: boolean;
   author_id: string;
+  tags: string[] | null;
 };
 
 export type Profile = {
@@ -65,7 +66,7 @@ export const getPublishedSlugs = cache(async () => {
   const supabase = createAnonClient();
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("slug")
+    .select("slug, created_at, updated_at")
     .eq("is_published", true);
 
   if (error) {
@@ -73,7 +74,7 @@ export const getPublishedSlugs = cache(async () => {
     return [];
   }
 
-  return posts.map(post => post.slug);
+  return posts;
 });
 
 export const getAllPosts = cache(async () => {
@@ -124,17 +125,27 @@ export const getPostById = cache(async (id: string) => {
   return post as Post;
 });
 
-export const getPaginatedPosts = cache(async (params: { limit: number; offset: number }) => {
-  const { limit, offset } = params;
+export const getPaginatedPosts = cache(async (params: { limit: number; offset: number; search?: string; tag?: string }) => {
+  const { limit, offset, search, tag } = params;
   const supabase = createAnonClient();
   const end = offset + limit - 1;
 
-  const { data: posts, count, error } = await supabase
+  let query = supabase
     .from("posts")
     .select("*", { count: "exact" })
     .eq("is_published", true)
     .order("created_at", { ascending: false })
     .range(offset, end);
+
+  if (search) {
+    query = query.ilike("title", `%${search}%`);
+  }
+
+  if (tag) {
+    query = query.contains("tags", [tag]);
+  }
+
+  const { data: posts, count, error } = await query;
 
   if (error) {
     console.error("Error fetching paginated posts:", error);

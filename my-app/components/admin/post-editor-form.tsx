@@ -52,6 +52,7 @@ export function PostEditorForm({ mode, initialValues }: PostEditorFormProps) {
       excerpt: initialValues?.excerpt ?? "",
       content: initialValues?.content ?? "",
       cover_image_url: initialValues?.cover_image_url ?? null,
+      tags: initialValues?.tags ?? "",
       is_published: initialValues?.is_published ?? false,
     },
   });
@@ -241,6 +242,23 @@ export function PostEditorForm({ mode, initialValues }: PostEditorFormProps) {
               <FormControl>
                 <RichTextEditor value={field.value ?? ""} onChange={field.onChange} />
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tags</FormLabel>
+              <FormControl>
+                <Input placeholder="nextjs, supabase, design (comma separated)" {...field} />
+              </FormControl>
+              <FormDescription>
+                Comma separated tags for filtering and search.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

@@ -68,6 +68,7 @@ export async function createPost(values: CreatePostValues) {
     content: payload.content,
     cover_image_url: payload.cover_image_url,
     is_published: payload.is_published,
+    tags: payload.tags ? payload.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
     author_id: authorId,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -109,6 +110,7 @@ export async function updatePost(values: PostFormValues) {
       content: payload.content,
       cover_image_url: payload.cover_image_url,
       is_published: payload.is_published,
+      tags: payload.tags ? payload.tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
       updated_at: new Date().toISOString(),
       author_id: authorId,
     })
