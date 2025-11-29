@@ -14,9 +14,13 @@ import {
   navigationMenuTriggerStyle,
 } from "./ui/navigation-menu";
 import { ThemeSwitcher } from "./theme-switcher";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   const navItems = [
     { href: "/#solutions", label: "Solutions" },
@@ -49,15 +53,31 @@ export function Header() {
         <div className="hidden md:flex items-center gap-6">
           <NavigationMenu>
             <NavigationMenuList className="gap-2">
-              {navItems.map((item) => (
-                <NavigationMenuItem key={item.href}>
-                  <NavigationMenuLink asChild>
-                    <Link href={item.href} className={navigationMenuTriggerStyle()}>
-                      {item.label}
-                    </Link>
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <NavigationMenuItem key={item.href} className="relative">
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          navigationMenuTriggerStyle(),
+                          "bg-transparent hover:bg-transparent focus:bg-transparent data-[active]:bg-transparent data-[state=open]:bg-transparent"
+                        )}
+                      >
+                        {isActive && (
+                          <motion.div
+                            layoutId="navbar-indicator"
+                            className="absolute inset-0 rounded-md bg-accent"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                        <span className="relative z-10">{item.label}</span>
+                      </Link>
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                );
+              })}
             </NavigationMenuList>
           </NavigationMenu>
         </div>

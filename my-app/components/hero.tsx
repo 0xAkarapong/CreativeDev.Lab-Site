@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { MotionButton } from "@/components/ui/motion-button";
 
 const stats = [
   { label: "Projects Shipped", value: "100+" },
@@ -39,14 +40,28 @@ export function Hero() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="mt-10 flex flex-wrap items-center justify-center gap-4"
       >
-        <Button asChild size="lg" className="h-12 px-8 text-base">
-          <Link href="/#contact">Launch a project</Link>
-        </Button>
-        <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
-          <Link href="/blog">Read the blog</Link>
-        </Button>
+        <div className="mt-10 flex items-center justify-center gap-x-6">
+          <MotionButton
+            asChild
+            size="lg"
+            className="text-lg"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/#contact">Start a Project</Link>
+          </MotionButton>
+          <MotionButton
+            asChild
+            variant="ghost"
+            size="lg"
+            className="text-lg"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/blog">Read the Blog &rarr;</Link>
+          </MotionButton>
+        </div>
       </motion.div>
 
       <motion.dl

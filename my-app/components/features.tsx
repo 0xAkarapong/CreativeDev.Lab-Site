@@ -71,7 +71,12 @@ export function Features() {
         className="grid gap-6 md:grid-cols-2"
       >
         {features.map((feature) => (
-          <motion.div key={feature.title} variants={item}>
+          <motion.div
+            key={feature.title}
+            variants={item}
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
             <Card className="h-full bg-card/50 backdrop-blur-sm border-primary/10 transition-colors hover:bg-card/80 hover:border-primary/20">
               <CardHeader className="flex flex-row items-center gap-3">
                 <div className="rounded-lg bg-primary/10 p-2">

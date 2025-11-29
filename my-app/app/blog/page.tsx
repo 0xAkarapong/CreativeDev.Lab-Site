@@ -104,8 +104,15 @@ function BlogList({ posts }: { posts: Post[] }) {
       className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
     >
       {posts.map((post) => (
-        <motion.div key={post.id} variants={item} className="h-full">
-          <MotionBlogPostCard post={post} />
+        <motion.div
+          layout
+          key={post.id}
+          variants={item}
+          className="h-full"
+          whileHover={{ y: -5 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <BlogPostCard post={post} />
         </motion.div>
       ))}
       {!posts.length && (
