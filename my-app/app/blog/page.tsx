@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 
-import { BlogPostCard, MotionBlogPostCard } from "@/components/blog/blog-post-card";
+import { BlogPostCard } from "@/components/blog/blog-post-card";
 import { PaginationControls } from "@/components/blog/pagination-controls";
 import { SearchInput } from "@/components/blog/search-input";
+import { BlogListSkeleton } from "@/components/blog/blog-list-skeleton";
 import { getPaginatedPosts, type Post } from "@/lib/supabase/queries";
 import * as motion from "framer-motion/client";
 
@@ -38,19 +40,8 @@ export default async function Blog({
 }) {
   const resolvedSearchParams = await Promise.resolve(searchParams ?? {});
   const page = parsePage(resolvedSearchParams);
-  const offset = (page - 1) * POSTS_PER_PAGE;
   const search = typeof resolvedSearchParams.search === "string" ? resolvedSearchParams.search : undefined;
   const tag = typeof resolvedSearchParams.tag === "string" ? resolvedSearchParams.tag : undefined;
-
-  const { items, total } = await getPaginatedPosts({
-    limit: POSTS_PER_PAGE,
-    offset,
-    search,
-    tag,
-  });
-
-  const hasNextPage = page * POSTS_PER_PAGE < total;
-  const hasPreviousPage = page > 1;
 
   return (
     <main className="container mx-auto px-4 py-10 md:px-6 md:py-24">
@@ -69,14 +60,35 @@ export default async function Blog({
       </header>
 
       <section className="mt-12">
-        <BlogList posts={items} />
-        <PaginationControls
-          currentPage={page}
-          hasNext={hasNextPage}
-          hasPrevious={hasPreviousPage}
-        />
+        <Suspense fallback={<BlogListSkeleton />}>
+          <BlogContent page={page} search={search} tag={tag} />
+        </Suspense>
       </section>
     </main>
+  );
+}
+
+async function BlogContent({ page, search, tag }: { page: number; search?: string; tag?: string }) {
+  const offset = (page - 1) * POSTS_PER_PAGE;
+  const { items, total } = await getPaginatedPosts({
+    limit: POSTS_PER_PAGE,
+    offset,
+    search,
+    tag,
+  });
+
+  const hasNextPage = page * POSTS_PER_PAGE < total;
+  const hasPreviousPage = page > 1;
+
+  return (
+    <>
+      <BlogList posts={items} />
+      <PaginationControls
+        currentPage={page}
+        hasNext={hasNextPage}
+        hasPrevious={hasPreviousPage}
+      />
+    </>
   );
 }
 
