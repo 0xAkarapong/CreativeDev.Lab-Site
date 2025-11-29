@@ -29,7 +29,7 @@ export const getPublishedPosts = cache(async (page = 1, limit = 10) => {
 
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("id, title, slug, excerpt, cover_image_url, created_at, tags, author_id")
+    .select("*")
     .eq("is_published", true)
     .order("created_at", { ascending: false })
     .range(start, end);
