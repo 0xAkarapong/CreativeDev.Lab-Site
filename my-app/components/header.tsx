@@ -38,14 +38,7 @@ export function Header() {
             alt="CreativeDev.Lab"
             width={360}
             height={70}
-            className="h-10 w-auto md:h-16 dark:hidden"
-          />
-          <Image
-            src="/logo-dark.png"
-            alt="CreativeDev.Lab"
-            width={360}
-            height={70}
-            className="h-10 w-auto md:h-16 hidden dark:block"
+            className="h-10 w-auto md:h-16 dark:invert"
           />
         </Link>
 
