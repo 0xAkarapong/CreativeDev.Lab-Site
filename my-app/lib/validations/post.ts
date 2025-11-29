@@ -16,6 +16,7 @@ export const postFormSchema = z.object({
     .union([z.string().url("Provide a valid URL"), z.literal(""), z.null()])
     .transform((value) => (value ? value : null)),
   content: z.string().min(20, "Content is required"),
+  tags: z.string().optional(),
   is_published: z.boolean().default(false),
 });
 

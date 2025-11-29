@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { createUser, type ActionState } from "@/app/admin/users/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useActionState, useState, useEffect } from "react";
 
 const initialState: ActionState = {
   message: "",
@@ -37,7 +37,7 @@ function SubmitButton() {
 }
 
 export function CreateUserForm() {
-  const [state, formAction] = useFormState(createUser, initialState);
+  const [state, formAction] = useActionState(createUser, initialState);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

@@ -21,8 +21,8 @@ const baseUrl =
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
 
 export async function generateStaticParams() {
-  const slugs = await getPublishedSlugs();
-  return slugs.map((slug: string) => ({ slug }));
+  const posts = await getPublishedSlugs();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata(props: {
@@ -80,36 +80,47 @@ export default async function BlogPost(props: {
   const readingTime = calculateReadingTime(post.content ?? "");
 
   return (
-    <article className="container mx-auto py-12 max-w-4xl">
+    <article className="container mx-auto py-16 md:py-24 max-w-4xl">
       <Link
         href="/blog"
-        className="text-sm text-muted-foreground hover:text-foreground"
+        className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors mb-8 inline-block"
       >
         ← Back to blog
       </Link>
-      <header className="mt-6 space-y-4">
-        <p className="text-sm font-semibold text-primary">
-          Published {formatDate(post.created_at)}
-        </p>
-        <h1 className="text-4xl font-bold tracking-tight">{post.title}</h1>
-        <p className="text-lg text-muted-foreground">{post.excerpt}</p>
-        <p className="text-sm text-muted-foreground">
-          {readingTime} minute read
-        </p>
+      <header className="space-y-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <time dateTime={post.created_at}>{formatDate(post.created_at)}</time>
+          <span>·</span>
+          <span>{readingTime} min read</span>
+        </div>
+        <h1 className="text-4xl font-bold tracking-tight font-heading sm:text-5xl md:text-6xl leading-tight">
+          {post.title}
+        </h1>
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span key={tag} className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold transition-colors border-transparent bg-secondary text-secondary-foreground">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        <p className="text-xl text-muted-foreground leading-relaxed">{post.excerpt}</p>
       </header>
 
-      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary mt-10">
+      <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-secondary mt-12 border border-border/50 shadow-sm">
         <Image
           src={cover}
           alt={post.title}
           fill
           sizes="(max-width: 768px) 100vw, 800px"
           className="object-cover"
+          priority
         />
       </div>
 
       <section
-        className="blog-content mt-10 space-y-6 text-base leading-relaxed"
+        className="blog-content mt-12 space-y-6 text-lg leading-relaxed text-foreground/90"
         dangerouslySetInnerHTML={{ __html: post.content ?? "" }}
       />
 

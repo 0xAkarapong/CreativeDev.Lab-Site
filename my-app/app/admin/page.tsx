@@ -16,7 +16,8 @@ export default async function AdminDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
   
   // Auto-create profile for default admin if missing
-  if (user?.email === "akarapong00123@gmail.com") {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (adminEmail && user && user.email === adminEmail) {
     await supabase
       .from("profiles")
       .upsert({

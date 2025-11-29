@@ -29,7 +29,7 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/60 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-20 max-w-screen-2xl items-center px-4 md:px-8">
         <div className="mr-8 hidden md:flex">
           <Link href="/" className="mr-8 flex items-center space-x-2">
@@ -86,7 +86,7 @@ export function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="pr-0">
+            <SheetContent side="right" className="pr-0 border-l border-white/10 bg-background/80 backdrop-blur-xl">
                 <div className="flex flex-col gap-6 py-6">
                   <Link
                     href="/"
