@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center">
-      <div className="w-full max-w-5xl flex-1 space-y-20 px-5 py-16">
+      <div className="w-full max-w-5xl flex-1 space-y-12 px-4 py-10 md:space-y-20 md:px-5 md:py-16">
         <Hero />
         <Features />
 

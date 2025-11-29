@@ -14,7 +14,7 @@ export function Hero() {
   return (
     <section className="relative text-center" id="top">
       <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden">
-        <div className="h-[500px] w-[500px] rounded-full bg-primary/20 blur-[100px]" />
+        <div className="h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] rounded-full bg-primary/20 blur-[100px]" />
       </div>
       
       <motion.div
@@ -25,7 +25,7 @@ export function Hero() {
         <p className="text-sm font-semibold uppercase tracking-wide text-primary">
           CreativeDev.Lab · Product Studio
         </p>
-        <h1 className="mt-4 text-4xl font-bold tracking-tight sm:text-6xl font-heading">
+        <h1 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl md:text-6xl font-heading">
           Landing pages and blogs engineered to convert.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">

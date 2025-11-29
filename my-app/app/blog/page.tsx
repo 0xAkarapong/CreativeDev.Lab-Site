@@ -53,7 +53,7 @@ export default async function Blog({
   const hasPreviousPage = page > 1;
 
   return (
-    <main className="container mx-auto py-16 md:py-24">
+    <main className="container mx-auto px-4 py-10 md:px-6 md:py-24">
       <header className="max-w-3xl space-y-6">
         <p className="text-sm font-semibold text-primary uppercase tracking-wide">CreativeDev.Lab Blog</p>
         <h1 className="text-4xl font-bold tracking-tight font-heading sm:text-5xl">
