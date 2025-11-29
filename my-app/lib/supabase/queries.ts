@@ -29,7 +29,7 @@ export const getPublishedPosts = cache(async (page = 1, limit = 10) => {
 
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("*")
+    .select("id, title, slug, excerpt, cover_image_url, created_at, tags, author_id")
     .eq("is_published", true)
     .order("created_at", { ascending: false })
     .range(start, end);
@@ -96,7 +96,7 @@ export const getRelatedPosts = cache(async (currentSlug: string, limit = 3) => {
   const supabase = createAnonClient();
   const { data: posts, error } = await supabase
     .from("posts")
-    .select("*")
+    .select("id, title, slug, excerpt, cover_image_url, created_at, tags, author_id")
     .eq("is_published", true)
     .neq("slug", currentSlug)
     .order("created_at", { ascending: false })
@@ -132,7 +132,7 @@ export const getPaginatedPosts = cache(async (params: { limit: number; offset: n
 
   let query = supabase
     .from("posts")
-    .select("*", { count: "exact" })
+    .select("id, title, slug, excerpt, cover_image_url, created_at, tags, author_id", { count: "exact" })
     .eq("is_published", true)
     .order("created_at", { ascending: false })
     .range(offset, end);
